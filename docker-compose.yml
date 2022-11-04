@@ -1,0 +1,40 @@
+version: "3" # optional since v1.27.0
+
+services:
+  #Client
+  front:
+    build: oririnn_front
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./oririnn_front:/app
+
+  #DB
+  db:
+    image: mysql:latest
+    expose:
+      - 3306
+    environment:
+      MYSQL_DATABASE: oririnn
+      MYSQL_USER: user
+    env_file: .env
+    volumes:
+      - ./oririnn_db:/docker-entrypoint-initdb.d
+      - dbdata:/var/lib/mysql
+
+  #Server
+  back:
+    build: oririnn_back
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: on-failure
+    volumes:
+      - ./oririnn_back:/app
+      - exclude:/app/node_modules/
+
+#Volumes
+volumes:
+  dbdata:
+  exclude:
